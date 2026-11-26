@@ -1,0 +1,3 @@
+export default function AdminProductsPage() {
+    return <h1>상품관리</h1>;
+}
