@@ -1,13 +1,13 @@
-package com.firstproject;
+package com.team4.sogogi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class backApplication {
+public class SogogiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(backApplication.class, args);
+        SpringApplication.run(SogogiApplication.class, args);
     }
 
 }
