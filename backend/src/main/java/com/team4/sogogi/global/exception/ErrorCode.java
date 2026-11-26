@@ -18,6 +18,13 @@ public enum ErrorCode {
     // 404 Not Found: 존재하지 않는 리소스
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
+    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 주소를 찾을 수 없습니다."),
+
+    // 405 Method Not Allowed: 지원하지 않는 HTTP 메서드
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다."),
+
+    // 415 Unsupported Media Type: 지원하지 않는 Content-Type
+    UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 Content-Type입니다."),
 
     // 409 Conflict: 상태 충돌
     ORDER_ALREADY_SHIPPED(HttpStatus.CONFLICT, "이미 배송된 주문은 수정·취소할 수 없습니다."),

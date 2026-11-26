@@ -11,10 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -66,8 +69,47 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."));
     }
 
+    @Test
+    void 필수_파라미터_누락시_400() throws Exception {
+        mockMvc.perform(get("/test/orders"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
+                .andExpect(jsonPath("$.message").value("email: 필수 파라미터입니다."));
+    }
+
+    @Test
+    void 없는_주소_요청시_404() throws Exception {
+        mockMvc.perform(get("/test/unknown"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+    }
+
+    @Test
+    void 지원하지_않는_메서드_405() throws Exception {
+        mockMvc.perform(delete("/test/items"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(header().string("Allow", "POST"))
+                .andExpect(jsonPath("$.status").value(405))
+                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"));
+    }
+
+    @Test
+    void 지원하지_않는_Content_Type_415() throws Exception {
+        mockMvc.perform(post("/test/items")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("quantity=1"))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.status").value(415))
+                .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_TYPE"));
+    }
+
     @RestController
     static class TestController {
+
+        @GetMapping("/test/orders")
+        void findOrders(@RequestParam String email) {
+        }
 
         record ItemRequest(@Positive(message = "수량은 1 이상이어야 합니다.") int quantity) {
         }
