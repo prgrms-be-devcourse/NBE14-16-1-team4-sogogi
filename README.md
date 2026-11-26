@@ -75,15 +75,16 @@
 
 | 구분 | 기술 |
 |---|---|
-| **Backend** | Java 17, Spring Boot 3.x, Spring Data JPA, Validation |
-| **Database** | MySQL (개발·테스트: H2) |
-| **Frontend** | React, React Router, Axios |
-| **Test** | JUnit5, Mockito, Postman |
-| **Docs** | Swagger (springdoc-openapi), Notion |
+| **Backend** | Java 25 (LTS), Spring Boot 4, Spring Data JPA, Bean Validation |
+| **Database** | MySQL 8.4 (LTS) (개발·테스트: H2) |
+| **Frontend** | React 19, Vite, React Router, Axios |
+| **Test** | JUnit 6, Mockito 5, Postman |
+| **Docs** | Swagger (springdoc-openapi 3), Notion |
+| **Build** | Gradle (Kotlin DSL) |
 | **Collaboration** | GitHub, Notion (WBS·칸반), Slack |
 | **Deploy (심화)** | Railway (Backend·DB), Vercel (Frontend) |
 
-> 기술 스택은 1일차 설계 회의에서 최종 확정합니다.
+> 2026년 11월 기준 최신 안정 버전입니다. 세부 버전은 [start.spring.io](https://start.spring.io)와 `npm create vite` 기본값을 따르고, 1일차 설계 회의에서 최종 확정합니다.
 
 ---
 
