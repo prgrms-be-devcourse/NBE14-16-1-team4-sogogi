@@ -20,6 +20,7 @@
 11. [협업 규칙](#-협업-규칙)
 12. [일정](#-일정)
 13. [심화 과제](#-심화-과제)
+14. [실행 방법](#-실행-방법)
 
 ---
 
@@ -285,14 +286,12 @@ frontend/
 
 ## 👥 팀 구성 및 역할
 
-| 담당 | 백엔드 | 프론트엔드 | 
-|---|---|---|
-| **A** | Spring 초기 세팅, 공통 예외 처리, Swagger, 상품 CRUD API | 관리자 상품 관리 화면 |
-| **B** | 주문 생성 API | 고객 상품 목록, 장바구니·주문 폼 화면 |
-| **C** | 고객 주문 조회·수정·취소 API | React 초기 세팅, 고객 주문 조회 화면 |
-| **D** | `DeliveryPolicy`(2시 마감), 이메일 병합 로직, 관리자 주문 목록·상태 변경 API | 관리자 주문 관리 화면 |
-
-> 팀원 이름과 GitHub 계정은 확정 후 업데이트합니다.
+| 담당 | 이름 | GitHub | 백엔드 | 프론트엔드 |
+|---|---|---|---|---|
+| **A** | 서문준 | [@smj0617](https://github.com/smj0617) | Spring 초기 세팅, 공통 예외 처리, Swagger, 상품 CRUD API | 관리자 상품 관리 화면 |
+| **B** | 김조이 | [@zoek1211](https://github.com/zoek1211) | 주문 생성 API | 고객 상품 목록, 장바구니·주문 폼 화면 |
+| **C** | 문승환 | [@tmdghks-dev](https://github.com/tmdghks-dev) | 고객 주문 조회·수정·취소 API | React 초기 세팅, 고객 주문 조회 화면 |
+| **D** | 우경빈 | [@bin0421](https://github.com/bin0421) | `DeliveryPolicy`(2시 마감), 이메일 병합 로직, 관리자 주문 목록·상태 변경 API | 관리자 주문 관리 화면 |
 
 ---
 
@@ -375,15 +374,50 @@ main      ← 최종 배포·발표용 (직접 push 금지)
 
 ## 🚀 실행 방법
 
-> 초기 세팅 완료 후 작성합니다.
+### 사전 준비
+| 도구 | 버전 | 확인 |
+|---|---|---|
+| Java | 25 이상 | `java -version` |
+| Node.js | LTS | `node -v` |
 
+### 1. 저장소 가져오기
 ```bash
-# Backend
+git clone https://github.com/prgrms-be-devcourse/NBE14-16-1-team4-sogogi.git
+cd NBE14-16-1-team4-sogogi
+git switch dev
+```
+
+### 2. 백엔드 실행 (http://localhost:8080)
+```bash
 cd backend
 ./gradlew bootRun
+```
+| 주소 | 설명 |
+|---|---|
+| `/swagger-ui/index.html` | API 문서 · 직접 호출 |
+| `/h2-console` | DB 콘솔 (JDBC URL `jdbc:h2:mem:sogogi`, User `sa`, Password 없음) |
 
-# Frontend
+> 개발 환경은 메모리 DB(H2)라서 서버를 끄면 데이터가 초기화됩니다.
+
+### 3. 프론트엔드 실행 (http://localhost:5173)
+새 터미널에서 실행합니다.
+```bash
 cd frontend
 npm install
 npm run dev
 ```
+> `/api`로 시작하는 요청은 Vite 프록시가 백엔드(8080)로 전달합니다. 백엔드를 먼저 실행해 주세요.
+
+### 4. 테스트
+```bash
+cd backend
+./gradlew test
+```
+
+### 문제 해결
+| 증상 | 해결 |
+|---|---|
+| `permission denied: ./gradlew` | `git pull`로 최신 `dev` 받기, 또는 `sh ./gradlew bootRun` |
+| IntelliJ에서 `backApplication`을 찾을 수 없음 | `Edit Configurations`에서 삭제 후 `SogogiApplication` ▶로 실행 |
+| H2 콘솔 `Database not found` | JDBC URL을 `jdbc:h2:mem:sogogi`로 입력 |
+| Lombok 코드에 빨간 줄 | IntelliJ `Settings → Build → Compiler → Annotation Processors` → Enable annotation processing |
