@@ -1,6 +1,7 @@
 package com.team4.sogogi.order.domain;
 
 import com.team4.sogogi.global.common.BaseTimeEntity;
+import com.team4.sogogi.product.domain.Product;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -64,6 +65,27 @@ public class Order extends BaseTimeEntity {
     public void addOrderItem(OrderItem orderItem) {
         orderItems.add(orderItem);
         orderItem.assignOrder(this);
+    }
+
+    // 같은 상품이 이미 있으면 수량을 합치고, 없으면 새 주문 항목으로 추가한다.
+    public void addItem(Product product, int quantity) {
+        orderItems.stream()
+                .filter(item -> isSameProduct(item.getProduct(), product))
+                .findFirst()
+                .ifPresentOrElse(
+                        item -> item.changeQuantity(item.getQuantity() + quantity),
+                        () -> addOrderItem(OrderItem.builder()
+                                .product(product)
+                                .quantity(quantity)
+                                .build())
+                );
+    }
+    // 저장된 상품은 id로, 저장 전 상품(단위 테스트)은 같은 객체인지로 비교한다.
+    private boolean isSameProduct(Product a, Product b) {
+        if (a == b) {
+            return true;
+        }
+        return a.getId() != null && a.getId().equals(b.getId());
     }
 
     public void changeStatus(OrderStatus status) {
