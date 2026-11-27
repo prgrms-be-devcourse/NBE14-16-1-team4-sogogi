@@ -2,6 +2,7 @@ package com.team4.sogogi.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -43,8 +44,9 @@ public class GlobalExceptionHandler {
     /** 400: @PathVariable·@RequestParam 등 메서드 파라미터 제약 검증 실패 */
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<ApiErrorResponse> handleHandlerMethodValidation(HandlerMethodValidationException e) {
-        String message = e.getAllErrors().stream()
-                .map(error -> error.getDefaultMessage())
+        String message = e.getParameterValidationResults().stream()
+                .flatMap(result -> result.getResolvableErrors().stream()
+                        .map(error -> result.getMethodParameter().getParameterName() + ": " + error.getDefaultMessage()))
                 .collect(Collectors.joining(", "));
         return toResponse(ApiErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, message));
     }
@@ -52,13 +54,14 @@ public class GlobalExceptionHandler {
     /** 400: 타입 불일치 (예: /products/abc) */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
-        String message = e.getName() + ": 올바르지 않은 값입니다. (" + e.getValue() + ")";
+        String message = e.getName() + ": 올바르지 않은 값입니다.";    // 사용자 입력을 메세지 출력에서 제거
         return toResponse(ApiErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, message));
     }
 
     /** 400: JSON 본문 형식 오류 */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> handleNotReadable(HttpMessageNotReadableException e) {
+        log.warn("Invalid request body: {}", e.getMessage());
         return toResponse(ApiErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, "요청 본문 형식이 올바르지 않습니다."));
     }
 
@@ -92,9 +95,15 @@ public class GlobalExceptionHandler {
         return toResponse(ApiErrorResponse.of(ErrorCode.UNSUPPORTED_MEDIA_TYPE));
     }
 
-    /** 500: 예상하지 못한 예외 (내부 메시지는 응답에 노출하지 않는다) */
+    /** Spring 표준 예외는 원래 상태코드(4xx 등) 유지, 그 외 예상하지 못한 예외는 500 (내부 메시지는 응답에 노출하지 않는다) */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleException(Exception e) {
+        if (e instanceof org.springframework.web.ErrorResponse springError) {
+            HttpStatus status = HttpStatus.valueOf(springError.getStatusCode().value());
+            log.warn("Spring MVC exception: {}", e.getMessage());
+            return ResponseEntity.status(status)
+                    .body(new ApiErrorResponse(status.value(), status.name(), springError.getBody().getDetail()));
+        }
         log.error("Unhandled exception", e);
         return toResponse(ApiErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR));
     }
