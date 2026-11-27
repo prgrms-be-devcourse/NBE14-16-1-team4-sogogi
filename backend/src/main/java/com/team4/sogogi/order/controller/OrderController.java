@@ -24,7 +24,12 @@ public class OrderController {
 
     @Operation(summary = "내 주문 조회")
     @GetMapping
-    public List<OrderResponse> findByEmail(@RequestParam @NotBlank @Email String email) {
+    public List<OrderResponse> findByEmail(
+            @RequestParam
+            @NotBlank(message = "이메일은 필수입니다.")
+            @Email(message = "이메일 형식이 올바르지 않습니다.")
+            String email
+    ) {
         return orderService.findByEmail(email);
     }
 }

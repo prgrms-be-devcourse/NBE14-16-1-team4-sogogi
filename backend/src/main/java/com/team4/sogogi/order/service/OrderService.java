@@ -12,9 +12,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class OrderService {
+
     private final OrderRepository orderRepository;
 
-    public List<OrderResponse> findByEmail(String email){
-        return orderRepository.findByEmailOrderByCreatedAtDesc(email).stream().map(OrderResponse::from).toList();
+    public List<OrderResponse> findByEmail(String email) {
+        return orderRepository.findByEmailOrderByCreatedAtDesc(email).stream()
+                .map(OrderResponse::from)
+                .toList();
     }
 }
