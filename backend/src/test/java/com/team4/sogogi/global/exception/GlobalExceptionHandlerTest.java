@@ -95,13 +95,29 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void 지원하지_않는_Content_Type_415() throws Exception {
+    void 타입_불일치시_400_입력값_미노출() throws Exception {
+        mockMvc.perform(get("/test/products/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
+                .andExpect(jsonPath("$.message").value("id: 올바르지 않은 값입니다."));
+    }
+
+    @Test
+    void JSON_형식_오류시_400() throws Exception {
         mockMvc.perform(post("/test/items")
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("quantity=1"))
-                .andExpect(status().isUnsupportedMediaType())
-                .andExpect(jsonPath("$.status").value(415))
-                .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_TYPE"));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{broken"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
+                .andExpect(jsonPath("$.message").value("요청 본문 형식이 올바르지 않습니다."));
+    }
+
+    @Test
+    void 경로변수_검증_실패시_파라미터명_포함() throws Exception {
+        mockMvc.perform(get("/test/positive/0"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
+                .andExpect(jsonPath("$.message").value("id: 1 이상이어야 합니다."));
     }
 
     @RestController
@@ -131,6 +147,10 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/test/error")
         void error() {
             throw new IllegalStateException("내부 정보");
+        }
+
+        @GetMapping("/test/positive/{id}")
+        void positive(@PathVariable @Positive(message = "1 이상이어야 합니다.") Long id) {
         }
     }
 }
