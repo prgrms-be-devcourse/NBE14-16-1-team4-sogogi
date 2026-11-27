@@ -148,5 +148,9 @@ class GlobalExceptionHandlerTest {
         void error() {
             throw new IllegalStateException("내부 정보");
         }
+
+        @GetMapping("/test/positive/{id}")
+        void positive(@PathVariable @Positive(message = "1 이상이어야 합니다.") Long id) {
+        }
     }
 }
