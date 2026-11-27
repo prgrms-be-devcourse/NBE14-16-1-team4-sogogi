@@ -28,7 +28,7 @@ public class OrderService {
     private final DeliveryPolicy deliveryPolicy;
 
     public List<OrderResponse> findByEmail(String email) {
-        return orderRepository.findByEmailOrderByCreatedAtDesc(email).stream()
+        return orderRepository.findByEmailIgnoreCaseOrderByCreatedAtDesc(email).stream()
                 .map(OrderResponse::from)
                 .toList();
     }
@@ -42,7 +42,7 @@ public class OrderService {
         LocalDate deliveryDate = deliveryPolicy.getDeliveryDateKorea();
 
         Order order = orderRepository
-                .findFirstByEmailAndDeliveryDateAndStatusOrderByIdAsc(
+                .findFirstByEmailIgnoreCaseAndDeliveryDateAndStatusOrderByIdAsc(
                         request.email(), deliveryDate, OrderStatus.ORDERED)
                 .map(existing -> {
                     // 현재 정책: 같은 이메일·다른 주소면 최신 주소로 갱신 (주소별로 분리는 추후 추가)
