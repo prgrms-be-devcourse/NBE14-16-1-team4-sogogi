@@ -206,7 +206,14 @@ Content-Type: application/json
 ### API 문서 작성 규칙 (Swagger)
 - 서버 실행 후 `http://localhost:8080/swagger-ui/index.html`에서 API 문서를 확인하고 직접 테스트할 수 있습니다.
 - 문서 제목·설명·버전은 `global/config/OpenApiConfig`에서 관리합니다.
-- Controller 클래스에 `@Tag`로 그룹을 구분합니다.
+- Controller 클래스에 `@Tag`로 그룹을 구분합니다. 그룹 이름은 아래 3가지로 통일합니다.
+
+  | 태그 | 대상 API |
+  |---|---|
+  | `상품` | `/api/products/**` |
+  | `주문` | `/api/orders/**` (고객) |
+  | `관리자 주문` | `/api/admin/orders/**` |
+
   ```java
   @Tag(name = "상품")
   @RestController
