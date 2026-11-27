@@ -4,7 +4,7 @@ import com.team4.sogogi.global.exception.BusinessException;
 import com.team4.sogogi.global.exception.ErrorCode;
 import com.team4.sogogi.order.domain.DeliveryPolicy;
 import com.team4.sogogi.order.domain.Order;
-import com.team4.sogogi.order.domain.OrderItem;
+import com.team4.sogogi.order.domain.OrderStatus;
 import com.team4.sogogi.order.dto.OrderCreateRequest;
 import com.team4.sogogi.order.dto.OrderItemRequest;
 import com.team4.sogogi.order.dto.OrderResponse;
@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -27,30 +28,40 @@ public class OrderService {
     private final DeliveryPolicy deliveryPolicy;
 
     public List<OrderResponse> findByEmail(String email) {
-        return orderRepository.findByEmailOrderByCreatedAtDesc(email).stream()
+        return orderRepository.findByEmailIgnoreCaseOrderByCreatedAtDesc(email).stream()
                 .map(OrderResponse::from)
                 .toList();
     }
 
+    /**
+     * 같은 이메일 + 같은 배송일 + ORDERED 주문이 있으면 그 주문에 합치고(같은 상품은 수량 합산),
+     * 없으면 새 주문을 만든다. 취소·배송된 주문에는 합치지 않는다.
+     */
     @Transactional
     public OrderResponse create(OrderCreateRequest request) {
-        Order order = Order.builder()
-                .email(request.email())
-                .address(request.address())
-                .postcode(request.postcode())
-                .deliveryDate(deliveryPolicy.getDeliveryDateKorea())
-                .build();
+        LocalDate deliveryDate = deliveryPolicy.getDeliveryDateKorea();
+
+        Order order = orderRepository
+                .findFirstByEmailIgnoreCaseAndDeliveryDateAndStatusOrderByIdAsc(
+                        request.email(), deliveryDate, OrderStatus.ORDERED)
+                .map(existing -> {
+                    // 현재 정책: 같은 이메일·다른 주소면 최신 주소로 갱신 (주소별로 분리는 추후 추가)
+                    existing.changeAddress(request.address(), request.postcode());
+                    return existing;
+                })
+                .orElseGet(() -> Order.builder()
+                        .email(request.email())
+                        .address(request.address())
+                        .postcode(request.postcode())
+                        .deliveryDate(deliveryDate)
+                        .build());
 
         for (OrderItemRequest itemRequest : request.items()) {
             Product product = productRepository.findById(itemRequest.productId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "id=" + itemRequest.productId()));
-            order.addOrderItem(OrderItem.builder()
-                    .product(product)
-                    .quantity(itemRequest.quantity())
-                    .build());
+            order.addItem(product, itemRequest.quantity());
         }
 
-        //TODO(#20): 이메일 병합 로직이 merge 되면 병합 메서드 호출로 교체
         return OrderResponse.from(orderRepository.save(order));
     }
 }
