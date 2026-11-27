@@ -1,16 +1,17 @@
 package com.team4.sogogi.order.controller;
 
+import com.team4.sogogi.order.dto.OrderCreateRequest;
 import com.team4.sogogi.order.dto.OrderResponse;
 import com.team4.sogogi.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,5 +32,11 @@ public class OrderController {
             String email
     ) {
         return orderService.findByEmail(email);
+    }
+
+    @Operation(summary = "주문 생성", description = "오후 2시 이후 주문은 다음 날 배송됩니다.")
+    @PostMapping
+    public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request));
     }
 }
