@@ -44,6 +44,11 @@ public class OrderService {
         Order order = orderRepository
                 .findFirstByEmailAndDeliveryDateAndStatusOrderByIdAsc(
                         request.email(), deliveryDate, OrderStatus.ORDERED)
+                .map(existing -> {
+                    // 현재 정책: 같은 이메일·다른 주소면 최신 주소로 갱신 (주소별로 분리는 추후 추가)
+                    existing.changeAddress(request.address(), request.postcode());
+                    return existing;
+                })
                 .orElseGet(() -> Order.builder()
                         .email(request.email())
                         .address(request.address())

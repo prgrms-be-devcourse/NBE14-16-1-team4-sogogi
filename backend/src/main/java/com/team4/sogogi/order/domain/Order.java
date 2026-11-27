@@ -88,6 +88,12 @@ public class Order extends BaseTimeEntity {
         return a.getId() != null && a.getId().equals(b.getId());
     }
 
+    // 이메일만 같고 주소가 다른 주문 병합 시 최신 주문의 배송지로 갱신한다.
+    public void changeAddress(String address, String postcode) {
+        this.address = address;
+        this.postcode = postcode;
+    }
+
     public void changeStatus(OrderStatus status) {
         this.status = status;
     }
