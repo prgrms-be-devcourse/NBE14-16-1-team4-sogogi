@@ -12,6 +12,7 @@ import com.team4.sogogi.order.repository.OrderRepository;
 import com.team4.sogogi.product.domain.Product;
 import com.team4.sogogi.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,17 @@ public class OrderService {
 
     public List<OrderResponse> findByEmail(String email) {
         return orderRepository.findByEmailIgnoreCaseOrderByCreatedAtDesc(email).stream()
+                .map(OrderResponse::from)
+                .toList();
+    }
+
+    /** 관리자: 배송일(배송 그룹)별 주문 목록. 날짜가 없으면 지금 주문하면 들어갈 배송 그룹을 조회한다. */
+    public List<OrderResponse> findByDeliveryDate(LocalDate deliveryDate) {
+        LocalDate targetDate = (deliveryDate != null)
+                ? deliveryDate
+                : deliveryPolicy.getDeliveryDateKorea();
+
+        return orderRepository.findByDeliveryDate(targetDate, Sort.by(Sort.Direction.ASC, "id")).stream()
                 .map(OrderResponse::from)
                 .toList();
     }
