@@ -1,6 +1,10 @@
 spring:
   profiles:
     active: dev
+  jackson:
+    deserialization:
+      # 정수 필드에 소수(예: 5000.9)가 오면 잘라 저장하지 않고 400으로 거부한다.
+      accept-float-as-int: false
 
 ---
 spring:

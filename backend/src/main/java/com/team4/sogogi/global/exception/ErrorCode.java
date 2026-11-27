@@ -28,6 +28,7 @@ public enum ErrorCode {
 
     // 409 Conflict: 상태 충돌
     ORDER_ALREADY_SHIPPED(HttpStatus.CONFLICT, "이미 배송된 주문은 수정·취소할 수 없습니다."),
+    PRODUCT_HAS_ORDERS(HttpStatus.CONFLICT, "주문 이력이 있는 상품은 삭제할 수 없습니다."),
 
     // 500 Internal Server Error: 예상하지 못한 예외
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
